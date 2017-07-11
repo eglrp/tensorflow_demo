@@ -3,16 +3,17 @@ import matplotlib.pyplot as plt
 import cv2
 import load
 import tensorflow as tf
-
+# softmax计算模型
 x = tf.placeholder(tf.float32, [None, 784])
 W = tf.Variable(tf.zeros([784,10]))
 b = tf.Variable(tf.zeros([10]))
 y = tf.nn.softmax(tf.matmul(x,W) + b)
-
+# 输出？反正就这么定义呗
 y_ = tf.placeholder("float", [None,10])
 #cross_entropy = -tf.reduce_sum(y_*tf.log(y))
+# 我个人把这个理解成损失函数
 cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
-
+# 梯度下降
 train_step = tf.train.GradientDescentOptimizer(0.01).minimize(cross_entropy)
 #train_step = tf.train.MomentumOptimizer(0.01).minimize(cross_entropy)
 
