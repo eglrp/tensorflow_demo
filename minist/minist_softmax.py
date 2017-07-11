@@ -1,58 +1,52 @@
 import numpy as np
-import struct
 import matplotlib.pyplot as plt
-from PIL import Image
-def read_image(filename,path):
-	f = open(filename, 'rb')
-	index = 0
-	buf = f.read()
-	f.close()
-	magic, images, rows, columns = struct.unpack_from('>IIII' , buf , index)
-	index += struct.calcsize('>IIII')
+import cv2
+import load
+import tensorflow as tf
 
-	for i in range(images):
-		#for i in xrange(2000):
-		image = Image.new('L', (columns, rows))
+x = tf.placeholder(tf.float32, [None, 784])
+W = tf.Variable(tf.zeros([784,10]))
+b = tf.Variable(tf.zeros([10]))
+y = tf.nn.softmax(tf.matmul(x,W) + b)
 
-		for x in range(rows):
-			for y in range(columns):
-				image.putpixel((y, x), int(struct.unpack_from('>B', buf, index)[0]))
-				index += struct.calcsize('>B')
+y_ = tf.placeholder("float", [None,10])
+#cross_entropy = -tf.reduce_sum(y_*tf.log(y))
+cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
 
+train_step = tf.train.GradientDescentOptimizer(0.01).minimize(cross_entropy)
+#train_step = tf.train.MomentumOptimizer(0.01).minimize(cross_entropy)
 
-		print('save ' + str(i) + 'image')
-		image.save(path+'/' + str(i) + '.png')
-	print('搞定')
+init = tf.global_variables_initializer()
 
-def read_label(filename, saveFilename):
-	f = open(filename, 'rb')
-	index = 0
-	buf = f.read()
-	f.close()
+sess = tf.Session()
+sess.run(init)
 
-	magic, labels = struct.unpack_from('>II' , buf , index)
-	index += struct.calcsize('>II')
-  
-	labelArr = [0] * labels
+result = []
+result_index = []
 
-	for x in range(labels):
-		#for x in xrange(2000):
-		labelArr[x] = int(struct.unpack_from('>B', buf, index)[0])
-		index += struct.calcsize('>B')
+for i in range(1000): 
+	index = np.random.uniform(0,60000,size=100).astype(int)
+	batch_xs = load.train_data[index]
+	batch_ys = load.train_label[index]
+	#print(batch_xs.shape)
+	sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
+	if i % 10 == 0:
+		correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+		accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+		ac = sess.run(accuracy, feed_dict={x: load.test_data, y_: load.test_label})
+		result_index.append(i)
+		result.append(ac)
+		print(ac)
 		
-	save = open(saveFilename, 'w')
+plt.plot(result_index, result,'r', label='accuracy')  
+#plt.xticks(result, result, rotation=0) 
+plt.grid()  
+plt.show()  
 
-	save.write(','.join(map(lambda x: str(x), labelArr)))
-	save.write('\n')
-
-	save.close()
-	print('save labels success')
-
-# 把minist数据集转换为图像格式，第一次运行的时候使用
-def saveimg():
-	read_image('MNIST_data/train-images.idx3-ubyte','train')
-	read_label('MNIST_data/train-labels.idx1-ubyte', 'train/label.txt')
-	read_image('MNIST_data/t10k-images.idx3-ubyte','test')
-	read_label('MNIST_data/t10k-labels.idx1-ubyte', 'test/label.txt')
 if __name__ == '__main__':
 	pass
+	#saveimg()
+	#test_data = getdata('test/',10000)
+	#test_label = read_label('MNIST_data/t10k-labels.idx1-ubyte')
+	#train_data = getdata('train/',60000)
+	#train_label = read_label('MNIST_data/train-labels.idx1-ubyte')
