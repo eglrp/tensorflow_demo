@@ -8,5 +8,8 @@
 ## 2.分类模型
 | 模型名称| 效果 |
 |  ----- | -----|
-|![softmax分类器](https://github.com/catpanda/tensorflow_demo/blob/master/minist_softmax.py)|![拟合结果](https://github.com/catpanda/tensorflow_demo/blob/master/minist/mnist_softmax.png)|
+|![softmax分类器](https://github.com/catpanda/tensorflow_demo/blob/master/mnist_softmax.py)|![拟合结果](https://github.com/catpanda/tensorflow_demo/blob/master/minist/mnist_softmax.png)|
 ## 3.神经网络
+| 模型名称| 效果 |
+|  ----- | -----|
+|![全连接神经网络](https://github.com/catpanda/tensorflow_demo/blob/master/minist/mnist_bp.py)|![拟合结果](https://github.com/catpanda/tensorflow_demo/blob/master/minist/mnist_bp.png)|
