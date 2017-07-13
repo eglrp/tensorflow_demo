@@ -5,7 +5,7 @@ import load
 import tensorflow as tf
 
 learning_rate = 0.01
-training_epochs = 1500
+training_epochs = 200
 batch_size = 2000
 display_step = 1
 
@@ -30,20 +30,33 @@ biases = {
 
 layer_1 = tf.add(tf.matmul(x, weights['h1']), biases['b1'])
 layer_1 = tf.nn.relu(layer_1)
-# Hidden layer with RELU activation
+tf.summary.histogram('hiden_layer1_W',weights['h1'])
+tf.summary.histogram('hiden_layer1_b',biases['b1'])
+
 layer_2 = tf.add(tf.matmul(layer_1, weights['h2']), biases['b2'])
 layer_2 = tf.nn.relu(layer_2)
-# Output layer with linear activation
+tf.summary.histogram('hiden_layer2_W',weights['h2'])
+tf.summary.histogram('hiden_layer2_b',biases['b2'])
+
 out_layer = tf.matmul(layer_2, weights['out']) + biases['out']
 
 pred = out_layer
 
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
+
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
+graph = tf.get_default_graph()
+merged_summary_op = tf.summary.merge_all()
+
 init = tf.global_variables_initializer()
-sess = tf.Session()
+sess = tf.Session(graph=graph)
 sess.run(init)
+
+writer = tf.summary.FileWriter('board/', graph=graph)
+
+
+
 
 result = []
 result_index = []
@@ -53,8 +66,9 @@ for epoch in range(training_epochs):
 	index = np.random.uniform(0,60000,size=batch_size).astype(int)
 	batch_xs = load.train_data[index]
 	batch_ys = load.train_label[index]
-	sess.run(optimizer, feed_dict={x: batch_xs, y: batch_ys})
-	if epoch % 50 == 0:
+	summary_str = sess.run(optimizer, feed_dict={x: batch_xs, y: batch_ys})
+	writer.add_summary(summary_str, epoch)
+	if epoch % 20 == 0:
 		correct_prediction = tf.equal(tf.argmax(pred,1), tf.argmax(y,1))
 		accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 		ac = sess.run(accuracy, feed_dict={x: load.test_data, y: load.test_label})
