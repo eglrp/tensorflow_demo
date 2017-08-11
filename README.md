@@ -9,6 +9,8 @@ Python环境：Anaconda 4.2.0
 TensorFlow版本：1.2.0
 
 准备重装系统是一些GPU版本的了
+
+
 | 模型名称| 效果 |
 |  ----- | -----|
 |![二元线性回归](https://github.com/catpanda/tensorflow_demo/blob/master/linearregression.py)|![拟合结果](https://github.com/catpanda/tensorflow_demo/blob/master/linearregression.py.png)|
